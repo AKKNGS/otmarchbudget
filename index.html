@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#4f46e5" />
-
   <link rel="apple-touch-icon" href="logo.png" />
 </head>
 
@@ -34,28 +33,67 @@
 
     <!-- HOME PAGE -->
     <main id="home-page" class="page active" aria-label="ទិន្នន័យ">
-      <section class="hero">
-        <div class="hero-card">
-          <div class="stat">
-            <div class="stat-icon"><i class="fas fa-users-rectangle"></i></div>
-            <div class="stat-body">
-              <div class="stat-value" id="total-teachers">...</div>
-              <div class="stat-label">គ្រូសរុប</div>
-            </div>
+
+      <!-- ✅ STATS GRID (NEW) -->
+      <section class="stats-grid" aria-label="ស្ថិតិខាងលើ">
+        <div class="stat-card">
+          <div class="stat-mini-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+          <div class="stat-mini-body">
+            <div class="stat-mini-value" id="total-teachers">...</div>
+            <div class="stat-mini-label">គ្រូសរុប</div>
           </div>
+        </div>
 
-          <div class="divider"></div>
+        <div class="stat-card">
+          <div class="stat-mini-icon"><i class="fas fa-user"></i></div>
+          <div class="stat-mini-body">
+            <div class="stat-mini-value" id="female-teachers">...</div>
+            <div class="stat-mini-label">គ្រូស្រី</div>
+          </div>
+        </div>
 
-          <div class="stat">
-            <div class="stat-icon"><i class="fas fa-money-bill-trend-up"></i></div>
-            <div class="stat-body">
-              <div class="stat-value" id="total-budget">...</div>
-              <div class="stat-label">ថវិកាសរុប</div>
-            </div>
+        <div class="stat-card">
+          <div class="stat-mini-icon"><i class="fas fa-user-graduate"></i></div>
+          <div class="stat-mini-body">
+            <div class="stat-mini-value" id="total-students">...</div>
+            <div class="stat-mini-label">សិស្សសរុប</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-mini-icon"><i class="fas fa-user"></i></div>
+          <div class="stat-mini-body">
+            <div class="stat-mini-value" id="female-students">...</div>
+            <div class="stat-mini-label">សិស្សស្រី</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-wide">
+          <div class="stat-mini-icon"><i class="fas fa-money-bill-trend-up"></i></div>
+          <div class="stat-mini-body">
+            <div class="stat-mini-value" id="total-budget">...</div>
+            <div class="stat-mini-label">ថវិកាសរុប</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-mini-icon"><i class="fas fa-circle-check"></i></div>
+          <div class="stat-mini-body">
+            <div class="stat-mini-value" id="total-80">...</div>
+            <div class="stat-mini-label">ថវិកា 80%</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-mini-icon"><i class="fas fa-building-columns"></i></div>
+          <div class="stat-mini-body">
+            <div class="stat-mini-value" id="total-20">...</div>
+            <div class="stat-mini-label">ថវិកា 20%</div>
           </div>
         </div>
       </section>
 
+      <!-- Data Card -->
       <section class="card">
         <div class="card-head">
           <div class="tabs" role="tablist" aria-label="ទិន្នន័យ">
@@ -152,7 +190,6 @@
   <script src="script.js"></script>
 
   <script>
-    // ចុះឈ្មោះ Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
