@@ -14,7 +14,7 @@ function showToast(msg) {
 }
 
 function parseMoney(val) {
-  // ដកយកតែលេខ (ដោះស្រាយ KHR / ៛ / comma)
+  // គាំទ្រ "140,000 KHR", "70,000 ៛" ...
   const digits = String(val ?? "0").replace(/[^\d]/g, "");
   return parseInt(digits, 10) || 0;
 }
@@ -23,35 +23,10 @@ function formatRiel(n) {
   return `${(n || 0).toLocaleString()} ៛`;
 }
 
-function detectGenderValue(obj) {
-  // ស្វែងរក key ភេទដែលអាចមាន
-  const keys = [
-    "ភេទ", "Gender", "gender", "sex", "Sex",
-    "ភេទគ្រូ", "ភេទសិស្ស", "Gender(ភេទ)"
-  ];
-  for (const k of keys) {
-    if (obj && obj[k] != null && String(obj[k]).trim() !== "") {
-      return String(obj[k]).trim();
-    }
-  }
-
-  // បើមិនមាន keys ខាងលើ អាចមាន key ផ្សេងៗ (ពិនិត្យទាំងអស់ដោយ heuristic)
-  if (obj) {
-    for (const k of Object.keys(obj)) {
-      const lk = k.toLowerCase();
-      if (lk.includes("gender") || lk.includes("sex") || lk.includes("ភេទ")) {
-        const v = String(obj[k] ?? "").trim();
-        if (v) return v;
-      }
-    }
-  }
-  return "";
-}
-
-function isFemale(obj) {
-  const g = detectGenderValue(obj).toLowerCase();
-  // គាំទ្រទាំង Khmer + English
-  return g.includes("ស្រី") || g === "f" || g.includes("female");
+// ✅ ពីរូប Sheet របស់អ្នក៖ key ភេទ = "ភេទ" (Male/Female)
+function isFemaleByGenderKey(obj) {
+  const g = String(obj?.["ភេទ"] ?? "").trim().toLowerCase();
+  return g === "female" || g === "f" || g.includes("ស្រី");
 }
 
 // ---------- Navigation ----------
@@ -82,7 +57,6 @@ function setTab(type, forceRender = false) {
 
   currentView = type;
 
-  // clear search
   $("search-input").value = "";
   if (forceRender) {
     type === "teachers" ? renderTeachers() : renderStudents();
@@ -109,13 +83,13 @@ async function loadAllData() {
     $("total-teachers").innerText = `${teachers.length} នាក់`;
     $("total-students").innerText = `${students.length} នាក់`;
 
-    const femaleTeachers = teachers.reduce((c, t) => c + (isFemale(t) ? 1 : 0), 0);
-    const femaleStudents = students.reduce((c, s) => c + (isFemale(s) ? 1 : 0), 0);
+    const femaleTeachers = teachers.reduce((c, t) => c + (isFemaleByGenderKey(t) ? 1 : 0), 0);
+    const femaleStudents = students.reduce((c, s) => c + (isFemaleByGenderKey(s) ? 1 : 0), 0);
 
     $("female-teachers").innerText = `${femaleTeachers} នាក់`;
     $("female-students").innerText = `${femaleStudents} នាក់`;
 
-    // ✅ Budget totals (from teachers list)
+    // ✅ Budget totals (គិតពី Sheet Data/គ្រូ)
     const total100 = teachers.reduce((sum, t) => sum + parseMoney(t["ថវិកាប្រមូលបាន"]), 0);
     const total80  = teachers.reduce((sum, t) => sum + parseMoney(t["ថវិកាគ្រូ 80%"]), 0);
     const total20  = teachers.reduce((sum, t) => sum + parseMoney(t["ថវិកាសាលា20%"]), 0);
@@ -232,15 +206,12 @@ function handleSearch() {
 }
 
 function bindUI() {
-  // Bottom nav
   $("nav-data").addEventListener("click", () => setActivePage("home"));
   $("nav-profile").addEventListener("click", () => setActivePage("profile"));
 
-  // Tabs
   $("tab-teachers").addEventListener("click", () => setTab("teachers", true));
   $("tab-students").addEventListener("click", () => setTab("students", true));
 
-  // Search
   $("search-input").addEventListener("input", handleSearch);
   $("btn-clear").addEventListener("click", () => {
     $("search-input").value = "";
@@ -248,7 +219,6 @@ function bindUI() {
     $("search-input").focus();
   });
 
-  // Refresh
   $("btn-refresh").addEventListener("click", () => loadAllData());
 }
 
