@@ -1,0 +1,12 @@
+{
+  "name": "របាយការណ៍ថវិកា - ហម ម៉ាលីនដា",
+  "short_name": "ថវិកាបំប៉ន",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#4f46e5",
+  "icons": [
+    { "src": "logo.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "logo.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
