@@ -13,6 +13,48 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 1800);
 }
 
+function parseMoney(val) {
+  // ដកយកតែលេខ (ដោះស្រាយ KHR / ៛ / comma)
+  const digits = String(val ?? "0").replace(/[^\d]/g, "");
+  return parseInt(digits, 10) || 0;
+}
+
+function formatRiel(n) {
+  return `${(n || 0).toLocaleString()} ៛`;
+}
+
+function detectGenderValue(obj) {
+  // ស្វែងរក key ភេទដែលអាចមាន
+  const keys = [
+    "ភេទ", "Gender", "gender", "sex", "Sex",
+    "ភេទគ្រូ", "ភេទសិស្ស", "Gender(ភេទ)"
+  ];
+  for (const k of keys) {
+    if (obj && obj[k] != null && String(obj[k]).trim() !== "") {
+      return String(obj[k]).trim();
+    }
+  }
+
+  // បើមិនមាន keys ខាងលើ អាចមាន key ផ្សេងៗ (ពិនិត្យទាំងអស់ដោយ heuristic)
+  if (obj) {
+    for (const k of Object.keys(obj)) {
+      const lk = k.toLowerCase();
+      if (lk.includes("gender") || lk.includes("sex") || lk.includes("ភេទ")) {
+        const v = String(obj[k] ?? "").trim();
+        if (v) return v;
+      }
+    }
+  }
+  return "";
+}
+
+function isFemale(obj) {
+  const g = detectGenderValue(obj).toLowerCase();
+  // គាំទ្រទាំង Khmer + English
+  return g.includes("ស្រី") || g === "f" || g.includes("female");
+}
+
+// ---------- Navigation ----------
 function setActivePage(page) {
   // page: home | profile
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
@@ -22,15 +64,13 @@ function setActivePage(page) {
   const navBtn = page === "home" ? $("nav-data") : $("nav-profile");
   navBtn.classList.add("active");
 
-  // ✅ តម្រូវការរបស់អ្នក:
-  // ចុច "ទិន្នន័យ" => បង្ហាញទៅ Tab "គ្រូ" ជានិច្ច
+  // ✅ តម្រូវការអ្នក: ចុច "ទិន្នន័យ" => បង្ហាញ Tab "គ្រូ" ជានិច្ច
   if (page === "home") {
     setTab("teachers", true);
   }
 }
 
 function setTab(type, forceRender = false) {
-  // type: teachers | students
   const tabTeachers = $("tab-teachers");
   const tabStudents = $("tab-students");
 
@@ -62,15 +102,27 @@ async function loadAllData() {
     const res = await fetch(SCRIPT_URL, { cache: "no-store" });
     globalData = await res.json();
 
-    // Total teachers
-    $("total-teachers").innerText = `${globalData.teachers.length} នាក់`;
+    const teachers = Array.isArray(globalData.teachers) ? globalData.teachers : [];
+    const students = Array.isArray(globalData.students) ? globalData.students : [];
 
-    // Total budget (only digits)
-    const total = globalData.teachers.reduce((sum, t) => {
-      const val = String(t["ថវិកាប្រមូលបាន"] || "0").replace(/[^\d]/g, "");
-      return sum + (parseInt(val, 10) || 0);
-    }, 0);
-    $("total-budget").innerText = `${total.toLocaleString()} ៛`;
+    // ✅ Counts
+    $("total-teachers").innerText = `${teachers.length} នាក់`;
+    $("total-students").innerText = `${students.length} នាក់`;
+
+    const femaleTeachers = teachers.reduce((c, t) => c + (isFemale(t) ? 1 : 0), 0);
+    const femaleStudents = students.reduce((c, s) => c + (isFemale(s) ? 1 : 0), 0);
+
+    $("female-teachers").innerText = `${femaleTeachers} នាក់`;
+    $("female-students").innerText = `${femaleStudents} នាក់`;
+
+    // ✅ Budget totals (from teachers list)
+    const total100 = teachers.reduce((sum, t) => sum + parseMoney(t["ថវិកាប្រមូលបាន"]), 0);
+    const total80  = teachers.reduce((sum, t) => sum + parseMoney(t["ថវិកាគ្រូ 80%"]), 0);
+    const total20  = teachers.reduce((sum, t) => sum + parseMoney(t["ថវិកាសាលា20%"]), 0);
+
+    $("total-budget").innerText = formatRiel(total100);
+    $("total-80").innerText = formatRiel(total80);
+    $("total-20").innerText = formatRiel(total20);
 
     // Default render teachers
     renderTeachers();
@@ -92,7 +144,7 @@ function renderTeachers(filter = "") {
   const container = $("data-list");
 
   const q = filter.trim().toLowerCase();
-  const filtered = globalData.teachers.filter(t =>
+  const filtered = (globalData.teachers || []).filter(t =>
     (t["ឈ្មោះគ្រូ"] || "").toLowerCase().includes(q)
   );
 
@@ -137,7 +189,7 @@ function renderStudents(filter = "") {
   const container = $("data-list");
 
   const q = filter.trim().toLowerCase();
-  const filtered = globalData.students.filter(s =>
+  const filtered = (globalData.students || []).filter(s =>
     (s["ឈ្មោះសិស្ស"] || "").toLowerCase().includes(q)
   );
 
