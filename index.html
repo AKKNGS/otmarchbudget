@@ -34,7 +34,7 @@
     <!-- HOME PAGE -->
     <main id="home-page" class="page active" aria-label="ទិន្នន័យ">
 
-      <!-- ✅ STATS GRID (NEW) -->
+      <!-- STATS GRID -->
       <section class="stats-grid" aria-label="ស្ថិតិខាងលើ">
         <div class="stat-card">
           <div class="stat-mini-icon"><i class="fas fa-chalkboard-teacher"></i></div>
@@ -185,6 +185,27 @@
     </nav>
 
     <div class="toast" id="toast" aria-live="polite"></div>
+  </div>
+
+  <!-- ✅ DETAIL MODAL (Bottom Sheet) -->
+  <div class="modal" id="detail-modal" aria-hidden="true">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-sheet" id="modal-sheet" role="dialog" aria-modal="true">
+      <div class="sheet-handle"></div>
+
+      <div class="sheet-header">
+        <div class="sheet-title" id="detail-title">ព័ត៌មានលម្អិត</div>
+        <button class="sheet-close" id="btn-close-modal" title="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="sheet-sub" id="detail-sub">—</div>
+
+      <div class="sheet-content" id="detail-content">
+        <!-- injected -->
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
